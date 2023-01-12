@@ -290,7 +290,7 @@
         token = localStorage.getItem("token_Aligram")
 
         setUI()
-        getPost()
+        getPost(id)
 
         
 
@@ -320,7 +320,7 @@
                 })
                 .then ((response) => {
                     showAlert("Comment Added Successfully!", "success")
-                    getPost()
+                    getPost(id)
                     document.getElementById("comment-input").value = ""
                     
                 })

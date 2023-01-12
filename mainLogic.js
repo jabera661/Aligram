@@ -6,7 +6,7 @@ let user = getCurrUser()
 
 function setUI(){
     token = localStorage.getItem("token_Aligram")
-    const user = JSON.parse(localStorage.getItem("user_Aligram"))
+    user = JSON.parse(localStorage.getItem("user_Aligram"))
 
     const userToolbar = document.getElementById("userUI-toolbar")
     const guestToolbar = document.getElementById("guestUI-toolbar")
@@ -59,8 +59,12 @@ function setUI(){
         }
     }
 
-    if (window.location == "index.html"){
+    let searchParams = new URLSearchParams(window.location.search)
+    let postIdSearch = searchParams.get("id")
+    if (postIdSearch == null){
         getPosts()
+    }else{
+        getPost(postIdSearch)
     }
     
 }
@@ -175,7 +179,7 @@ function getPosts(page = 1){
 
 }
 
-function getPost(){
+function getPost(id){
     toggleLoader(true)
     axios.get(baseUrl + `/posts/${id}`)
     .then((response) => {
@@ -183,7 +187,10 @@ function getPost(){
         // console.log(post)
 
         // console.log(document.getElementById("authorUsername"))
-        document.getElementById("authorUsername").innerHTML = post.author.username
+        if (document.getElementById("authorUsername") != null){
+            document.getElementById("authorUsername").innerHTML = post.author.username
+        }
+        
         let title = ""
         let avatar = "./profile_pics/default_user.png"
 
@@ -223,25 +230,31 @@ function getPost(){
         }
 
         // console.log(avatar)
-
+        let postToolBar = ""
+        if (token != null){
+            postToolBar = 
+            `
+            <span class="float-end">
+                <button class="btn btn-danger rounded-circle " style="height:40px; width: 40px; display: inline-flex; justify-content: center;" onclick="deletePostToggle(${post.id})" >
+                    <span class="material-symbols-outlined">
+                        delete
+                    </span>
+                </button>
+                <button class="btn btn-secondary rounded-circle" style="height:40px; width: 40px; display: inline-flex; justify-content: center;" onclick="EditPostBtnClicked('${encodeURIComponent(JSON.stringify(post))}')" >
+                    <span class="material-symbols-outlined" style="font-size: 23px">
+                        edit_square
+                    </span>
+                </button>
+            </span>
+            `
+        }
         let postDetailsHTML = 
         `
             <div class="card">
                 <h5 class="card-header">
                     <img class="img-thumbnail rounded-circle" style="width: 40px; height: 40px" src="${avatar}" alt="default_user">
                     <b>@${post.author.username}</b>
-                    <span class="float-end">
-                        <button class="btn btn-danger rounded-circle " style="height:40px; width: 40px; display: inline-flex; justify-content: center;" onclick="deletePostToggle(${post.id})" >
-                            <span class="material-symbols-outlined">
-                                delete
-                            </span>
-                        </button>
-                        <button class="btn btn-secondary rounded-circle" style="height:40px; width: 40px; display: inline-flex; justify-content: center;" onclick="EditPostBtnClicked('${encodeURIComponent(JSON.stringify(post))}')" >
-                            <span class="material-symbols-outlined" style="font-size: 23px">
-                                edit_square
-                            </span>
-                        </button>
-                    </span>
+                    ${postToolBar}
                 </h5>
                 <div class="card-body">
                     <img id="post-img" class="w-100" src="${post.image}" alt="post">
@@ -267,7 +280,10 @@ function getPost(){
         `
 
         
-        document.getElementById("post").innerHTML = postDetailsHTML
+        let postDiv = document.getElementById("post")
+        if (postDiv != null){
+            postDiv.innerHTML = postDetailsHTML
+        }
 
         
     
@@ -462,7 +478,7 @@ function addPostBtnClicked(){
     let url = ""
     let successMsg = ""
     let reload = () => {
-        getPost()
+        getPost(postId)
     }
     if (postId == "" || postId == null){
         url = `${baseUrl}/posts`
@@ -565,10 +581,13 @@ function deletePostBtnClicked(){
         //console.log(response.data.data)
         closeModal("deletePostModal")
         showAlert("Post Deleted Successfully!", "success")
-        if (window.location == "index.html"){
+
+        let searchParams = new URLSearchParams(window.location.search)
+        let postIdSearch = searchParams.get("id")
+        if (postIdSearch == null){
             getPosts()
-        }else {
-            window.location = "index.html"
+        }else{
+            window.location.href = "index.html"
         }
         
     }).catch((error) => {
