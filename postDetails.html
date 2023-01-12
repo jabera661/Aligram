@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Aligram</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    
+        <!-- IMPORT BOOTSTRAP -->
+        <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <!--// IMPORT BOOTSTRAP //-->
+    
+        <!-- IMPORT AXIOS -->
+        <script src="./node_modules/axios/dist/axios.min.js"></script>
+    
+        <style>
+            body{
+                background-color: #65647C;
+            }
+    
+            .bg-light{
+                background-color: #C7BCA1 !important;
+            }
+    
+            #add-post-trigger{
+                background-color: #C7BCA1; 
+                height: 60px;
+                width: 60px;
+                position: fixed; 
+                bottom: 20px; 
+                right: 30px;
+                border: none;
+    
+            }
+
+            #add-comment-btn{
+                color: azure;
+            }
+            #add-comment-btn:hover{
+                background-color: #C7BCA1;
+                color: black;
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- ===== Loader ===== -->
+        <div id="Loader" class="d-flex justify-content-center align-items-center d-none" >
+            <div class="lds-facebook" >
+                <div></div><div></div><div></div>
+            </div>
+        </div>
+        <!-- ====// Loader //==== -->
+
+        <!-- ======Modals====== -->
+
+        <!-- delete post Modal -->
+        <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete a post</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                Are you sure?
+                <input type="hidden" id="post-id-delete">
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" onclick="deletePostBtnClicked()" class="btn btn-danger">delete</button>
+                </div>
+            </div>
+            </div>
+        </div>
+        <!--// delete post Modal //-->
+
+        <!-- Login Modal -->
+        <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Login</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="username-input" class="col-form-label">Username: </label>
+                                <input type="text" id="username-input" class="form-control" >
+                            </div>
+                            <div class="mb-3">
+                                <label for="password-input" class="col-form-label">Password: </label>
+                                <input type="password" id="password-input" class="form-control"  />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="loginBtn-modal" class="btn btn-primary" onclick="loginBtnClicked()">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--// Login Modal //-->
+
+        <!-- Register Model -->
+        <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Register a new user</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="username-input" class="col-form-label">Name: </label>
+                                <input type="text" id="register-name-input" class="form-control" >
+                            </div>
+                            <div class="mb-3">
+                                <label for="username-input" class="col-form-label">Username: </label>
+                                <input type="text" id="register-username-input" class="form-control" >
+                            </div>
+                            <div class="mb-3">
+                                <label for="password-input" class="col-form-label">Password: </label>
+                                <input type="password" id="register-password-input" class="form-control"  />
+                            </div>
+                            <div class="mb-3">
+                                <label for="avatar-input" class="col-form-label">Password: </label>
+                                <input type="file" id="register-avatar-input" class="form-control"  />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="registerBtn-modal" class="btn btn-primary" onclick="registerBtnClicked()">Register</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--// Register Modal //-->
+
+        <!-- Add Post Modal -->
+        <div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="postModalTitle">Add a new post</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="post-title-input" class="col-form-label">Title</label>
+                                <input type="text" id="post-title-input" class="form-control" >
+                            </div>
+                            <div class="mb-3">
+                                
+                                <textarea id="post-body-input" class="form-control" style="width: 100%; height: 100px;" placeholder="body"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <input type="file" id="post-file-input" class="form-control"  />
+                            </div>
+                            <input type="hidden" id="postId">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="addPostBtn" class="btn btn-primary" onclick="addPostBtnClicked()">Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--// Add Post Modal //-->
+
+        <!-- ======// Modals //====== -->
+
+
+        <!-- Navbar Cont -->
+        <div class="container">
+            <div class="d-flex justify-content-center">
+                <div class="col col-md-9">
+                    <!-- Navbar -->
+                    <nav class="navbar navbar-expand-lg bg-light rounded pt-3">
+                        <div class="container-fluid">
+                        <a class="navbar-brand" href="index.html">Aligram</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                            <div class="navbar-nav">
+                            <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+                            <a class="nav-link" href="userProfile.html" id="profileLink">Profile</a>
+                            
+                            </div>
+                            <div class="w-100 d-flex justify-content-end" id="top-toolbar">
+                                
+                                <!-- When not Logged in -->
+                                <div id="guestUI-toolbar">
+                                    <button id="loginBtn" data-bs-toggle="modal" data-bs-target="#loginModal" type="button" class="btn btn-outline-success me-2 ">sign in</button>
+                                    <button id="registerBtn" data-bs-toggle="modal" data-bs-target="#registerModal" type="button" class="btn btn-outline-success me-2">register</button>
+                                </div>
+                                
+                                
+                                <!-- When Logged in -->
+                                <div id="userUI-toolbar">
+                                    <a href="" class="me-2"  id="profile-toggle" style="text-decoration: none; color: black;">
+                                        <img id="profile-toggle-avatar" src="profile_pics/default_user.png" alt="" class="rounded-circle img-thumbnail" style="height: 30px;">
+                                        <b id="profile-toggle-username">@username</b>
+                                    </a>
+                                    <button id="logoutBtn" onclick="logout()" class="btn btn-outline-danger">Logout</button>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        </div>
+                    </nav>
+                    <!--// Navbar //-->
+                </div>
+            </div>
+            
+        </div>
+        <!--// Navbar Cont //-->
+
+        <div class="container d-flex justify-content-center mt-4">
+            
+            <div class="col-md-9" >
+                <h4 style="color: #C7BCA1;">
+                    <span id="authorUsername">ali</span> 's Post
+                </h4>
+                <!-- Post -->
+                <div class="post mb-3 mt-4" id="post">
+                    <div class="card">
+                        <h5 class="card-header">
+                            <img class="img-thumbnail rounded-circle" style="width: 40px;" src="./profile_pics/default_user.png" alt="default_user">
+                            <b>@jabera661</b>
+                        </h5>
+                        <div class="card-body">
+                            <img id="post-img" class="w-100" src="./images/default_post.jpg" alt="default_post">
+                            <h6 class="text-muted">2 hours ago</h6>
+                            <h5 class="card-title">Example of How Posts should look like!</h5>
+                            <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate placeat cum vel mollitia necessitatibus nam deserunt sit, commodi dolores? Rerum cumque quos sed vitae officiis illum adipisci amet velit quis!</p>
+                            <hr>
+                            
+                            <a href="#" class="text-black" style="text-decoration: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-vector-pen" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M10.646.646a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1 0 .708l-1.902 1.902-.829 3.313a1.5 1.5 0 0 1-1.024 1.073L1.254 14.746 4.358 4.4A1.5 1.5 0 0 1 5.43 3.377l3.313-.828L10.646.646zm-1.8 2.908-3.173.793a.5.5 0 0 0-.358.342l-2.57 8.565 8.567-2.57a.5.5 0 0 0 .34-.357l.794-3.174-3.6-3.6z"/>
+                                    <path fill-rule="evenodd" d="M2.832 13.228 8 9a1 1 0 1 0-1-1l-4.228 5.168-.026.086.086-.026z"/>
+                                </svg>
+                                (4) comments
+                            </a>
+
+                        </div>
+
+                        <!-- comments section -->
+                        <div id="comments">
+                            <div class="comment p-3" style="border-top: 1px solid #C7BCA1;">
+                                <div>
+                                    <img src="./profile_pics/default_user.png" alt="" class="rounded-circle" style="height: 40px; width: 40px;">
+                                    <b>@ali</b>
+                                </div>
+                                <div>
+                                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Corporis ducimus facere beatae dolor magnam. Hic autem accusamus ut quia quam aperiam repellat excepturi, voluptates, placeat reprehenderit esse quos maiores incidunt.
+                                </div>
+                            </div>
+                        </div>
+                        <!--// comments section //-->
+                        
+                    </div>
+                </div>
+                <!--// Post //-->
+                <div id="addCommentDiv">
+                    
+                </div>
+
+                
+                
+            </div>
+        </div>  
+    </body>
+    <script src="mainLogic.js"></script>
+    <script>
+
+        const urlParams = new URLSearchParams(window.location.search)
+        const id = urlParams.get("id")
+        token = localStorage.getItem("token_Aligram")
+
+        setUI()
+        getPost()
+
+        
+
+        
+    
+
+        function addCommentBtnClicked(){
+            toggleLoader(true)
+            let comment = document.getElementById("comment-input").value 
+
+            
+
+            if(token == null){
+                showAlert("you have to log in first!", "danger")
+            } else {
+                let params = {
+                "body": comment
+                }
+
+                let headers = {
+                    "authorization": `Bearer ${token}`,
+                    "accept": `application/json`
+                }
+
+                axios.post(`${baseUrl}/posts/${id}/comments`, params, {
+                    "headers": headers
+                })
+                .then ((response) => {
+                    showAlert("Comment Added Successfully!", "success")
+                    getPost()
+                    document.getElementById("comment-input").value = ""
+                    
+                })
+                .catch((error) => {
+                    let errorMsg = error.response.data.message
+                    showAlert(errorMsg, "danger")
+                }).finally(() => {
+                    toggleLoader(false)
+                })
+            }
+
+            
+        }
+        
+        
+    </script>
+</html>
